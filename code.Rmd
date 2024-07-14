@@ -1,0 +1,137 @@
+---
+title: 'Data Set '
+author: "Sahasri S/18/511"
+date: "2024-05-27"
+output:
+  pdf_document: default
+  pdataset_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r}
+#packages
+library(tidyverse)
+library(dplyr)
+library(GGally)
+library(CCA)
+library(CCP)
+#library(psych)
+```
+
+```{r}
+#Dataset loading
+data = read_csv("Data_final.csv")
+head(data)
+
+
+
+#NA values
+data %>% summarise(across(everything(), ~ sum(is.na(.))))
+#duplicate data codeeee##########
+'no NA values'
+dim(data)
+
+```
+
+```{r}
+colnames(data)
+data_for_CCA = data[,-11]
+summary(data_for_CCA)
+head(data_for_CCA)
+colnames(data_for_CCA)
+```
+
+
+```{r}
+#normality testing
+shapiroResults = sapply(data_for_CCA, shapiro.test)
+shapiroResults
+ #for all varible p=vlue <0.05
+
+```
+```{r}
+setA = data_for_CCA[,1:5]
+head(setA)
+setB = data_for_CCA[,-(1:5)]
+head(setB)
+dim(data_for_CCA)
+```
+
+
+```{r}
+
+ggpairs(setA)
+ggpairs(setB)
+```
+
+
+
+
+```{r}
+# correlations between A varibles ,B varibles and A&B varibles
+matcor(setA,setB)
+
+```
+
+```{r}
+cc1 <- cc(setA,setB)
+# display the canonical correlations
+cc1$cor
+sqrt(cc1$cor)
+
+# raw canonical coefficients
+cc1$xcoef
+cc1$ycoef
+```
+
+```{r}
+#compute the loadings of the variables on the canonical dimensions (variates). These loadings are correlations between variables and the canonical variates
+# compute canonical loadings
+cc2 <- comput(setA,setB, cc1)
+
+# display canonical loadings
+cc2[3:6]
+```
+
+
+```{r}
+# tests of canonical dimensions
+rho <- cc1$cor
+rho
+
+## Define number of observations, number of variables in first set, and number of variables in the second set.
+n <- dim(setA)[1]
+p <- length(setA)
+q <- length(setB)
+
+
+```
+
+```{r}
+## Calculate p-values using the F-approximations of different test statistics:
+p.asym(rho, n, p, q, tstat = "Wilks")
+```
+6.221236e-10 <0.05 -- reject H0 : conclude that the two sets of variables are dependent
+       same = H0 : all p canonical variate pairs are uncorrelated
+       an conclude that at least p1-rho /= not equal to 
+       
+1.637904e-03 <0.05 -- reject H0
+       second canonical variate pair p2-rho is correlated
+
+1.011735e-01 and below p vlues > 0.05 -- fail to reject H0
+
+
+
+```{r}
+p.asym(rho, n, p, q, tstat = "Hotelling")
+```
+
+```{r}
+p.asym(rho, n, p, q, tstat = "Pillai")
+```
+
+```{r}
+p.asym(rho, n, p, q, tstat = "Roy")
+```
+
